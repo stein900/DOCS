@@ -1,0 +1,33 @@
+#include <iostream>
+#include <vector>
+
+std::vector<uint8_t> escapeFrame(const std::vector<uint8_t>& frame) {
+    std::vector<uint8_t> escapedFrame;
+    bool First = true;
+    for (uint8_t byte : frame) {
+        if(!First){
+            if (byte == 0x7E || byte == 0x7D || byte == 0x11 || byte == 0x13) {
+                escapedFrame.push_back(0x7D);
+                escapedFrame.push_back(byte ^ 0x20);
+            } else {
+                escapedFrame.push_back(byte);
+            }
+        }
+        if(First) escapedFrame.push_back(0x7E);
+        First = false;
+    }
+    
+    return escapedFrame;
+}
+
+int main() {
+    std::vector<uint8_t> frame = {0x7E, 0x00, 0x03, 0x7D, 0xFA, 0x11};
+    std::vector<uint8_t> escapedFrame = escapeFrame(frame);
+    std::cout << "Trame échappée : ";
+    for (uint8_t byte : escapedFrame) {
+        std::cout << std::hex << static_cast<int>(byte) << " ";
+    }
+    std::cout << std::endl;
+    
+    return 0;
+}
