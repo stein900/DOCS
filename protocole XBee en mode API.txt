@@ -81,7 +81,7 @@ int main() {
     std::vector<uint8_t> escapedFrame;
     std::vector<std::string> analyseDeLaTrame;
     std::vector<std::string> calcules;
-    std::cout << "\033[90m" << "Trame d'origine  : " << "\033[0m";
+    std::cout << "\033[90m" << "Trame d'origine    : " << "\033[0m";
     if (aleatoire) {
         for (uint8_t byte : frameAleatoire) {
             std::cout << std::hex << static_cast<int>(byte) << " ";
@@ -101,8 +101,8 @@ int main() {
         ss << "  ";
     }
     std::string trameEchappee = ss.str();
-    std::cout << "\033[90m" << "Trame Echappee   : " << "\033[0m" << trameEchappee 
-        << "\033[90m" << std::endl << "Trame indication : " << "\033[0m";
+    std::cout << "\033[90m" << "Trame Echappee     : " << "\033[0m" << trameEchappee 
+        << "\033[90m" << std::endl << "Caractere echappee : " << "\033[0m";
     for (size_t i = 0; i < trameEchappee.size(); ++i) {
         if (i + 1 < trameEchappee.size() && trameEchappee[i] == '7' && trameEchappee[i + 1] == 'd') {
             std::cout << "\033[31m";
