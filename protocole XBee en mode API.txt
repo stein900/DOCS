@@ -1,13 +1,12 @@
+#pragma once
 #include <iostream>
 #include <vector>
 #include <random>
 #include <sstream>
 #include <string>
 #include <bitset>
-
 void explication();
 void calcule(uint8_t value, std::vector<std::string>& calculesTrame);
-
 std::vector<uint8_t> escapeFrame(const std::vector<uint8_t>& frame, std::vector<std::string>& trameAnalyse, std::vector<std::string>& calculesTrame) {
     std::vector<uint8_t> escapedFrame;
     bool First = true;
