@@ -39,10 +39,10 @@ void calcule(uint8_t value, std::vector<std::string>& calculesTrame) {
     std::bitset<8> twenty(0x20);
     std::bitset<8> result(value ^ 0x20);
 
-    std::string resultString = "\n\n\t\t" + byte.to_string() +"\n";
-    resultString += "\t\t" + twenty.to_string() + "\n";
-    resultString += "\t\t---------\n";
-    resultString += "\t\t" + result.to_string() + "\n\n\n";
+    std::string resultString = "\n\n\t\t " + byte.to_string() +"\n";
+    resultString += "\t\t " + twenty.to_string() + "\n";
+    resultString += "\t\t^--------\n";
+    resultString += "\t\t " + result.to_string() + "\n\n\n";
     
     calculesTrame.push_back(resultString);
 
