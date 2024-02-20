@@ -56,14 +56,26 @@ std::vector<unsigned char> generateRandomFrame(size_t length) {
     for (size_t i = 0; i < length; ++i) {
         randomFrame[i] = static_cast<unsigned char>(dis(gen));
     }
-
+    randomFrame.insert(randomFrame.begin(), 0x7E);
     return randomFrame;
 }
 
 int main() {
-    bool aleatoire = false; // Choissisez ici si vous souhaitez travailler sur une trame généré aléatoirement ou sur une trame exemple qui certifie des exemples claire
-    size_t frameLength = 56;
-    std::vector<unsigned char> frameAleatoire = generateRandomFrame(frameLength);
+    int choose = 0;
+    bool aleatoire = true; // Choissisez ici si vous souhaitez travailler sur une trame généré aléatoirement ou sur une trame exemple qui certifie des exemples claire
+    size_t frameLength = 25;
+    std::cout << "MENU : \n[1] : Trame Al\202atoire\n[2] : Trame exemple concret\n";
+    std::cin >> choose;
+    system("cls");
+    if (choose == 1) {
+        aleatoire = true;
+        std::cout << "Choisissez la taille de la trame (25 par defaut)";
+        std::cin >> frameLength;
+    }
+    else aleatoire = false;
+    system("cls");
+    std::vector<unsigned char> frameAleatoire = {0x7E};
+    frameAleatoire = generateRandomFrame(frameLength);
     std::vector<uint8_t> frameDefini = { 0x7E, 0x00, 0x03, 0x7D, 0xFA, 0x11 };
     explication();
     std::vector<uint8_t> escapedFrame;
@@ -111,6 +123,8 @@ int main() {
         std::cout << calcules.at(i);
     }
     
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     return 0;
 }
