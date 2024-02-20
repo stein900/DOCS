@@ -7,6 +7,9 @@
 #include <bitset>
 void explication();
 void calcule(uint8_t value, std::vector<std::string>& calculesTrame);
+std::vector<uint8_t> escapeFrame(const std::vector<uint8_t>& frame, std::vector<std::string>& trameAnalyse, std::vector<std::string>& calculesTrame);
+std::vector<unsigned char> generateRandomFrame(size_t length);
+
 std::vector<uint8_t> escapeFrame(const std::vector<uint8_t>& frame, std::vector<std::string>& trameAnalyse, std::vector<std::string>& calculesTrame) {
     std::vector<uint8_t> escapedFrame;
     bool First = true;
@@ -144,7 +147,7 @@ void explication() {
     std::cout << "\t^  0010 0000    \033[33m(0x20)\033[0m" << std::endl;
     std::cout << "\t------------------------" << std::endl;
     std::cout << "\t   0011 0001    \033[35m(0x31)\033[0m" << std::endl << std::endl;
-    std::cout << "Et donc \033[32m(0x11)\033[0m se transformera en 0x7D \033[35m0x31\033[0m" << std::endl << std::endl << std::endl << std::endl;
+    std::cout << "Et donc \033[32m(0x11)\033[0m se transformera en 0x7D \033[35m0x31\033[0m" << std::endl << std::endl << std::endl;
 
     std::cout << "\033[31m" << "\033[100m" << "\t\t\t\t\t\t TRAVAIL SUR LA TRAME " << "\033[0m" << std::endl;
 
