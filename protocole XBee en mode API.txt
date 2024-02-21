@@ -66,7 +66,7 @@ std::vector<unsigned char> generateRandomFrame(size_t length) {
     for (size_t i = 0; i < length; ++i) {
         randomFrame[i] = static_cast<unsigned char>(dis(gen));
     }
-    randomFrame.insert(randomFrame.begin(), 0x7E);
+    randomFrame.insert(randomFrame.begin(), { 0x7E, 0x00, static_cast<uint8_t>(length) });
     return randomFrame;
 }
 
