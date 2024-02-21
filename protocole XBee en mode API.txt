@@ -6,7 +6,6 @@
 #include <string>
 #include <bitset>
 #include <iomanip>
-
 void explication();
 void calcule(uint8_t value, std::vector<std::string>& calculesTrame);
 std::vector<uint8_t> escapeFrame(const std::vector<uint8_t>& frame, std::vector<std::string>& trameAnalyse, std::vector<std::string>& calculesTrame);
@@ -114,7 +113,7 @@ int main() {
     std::vector<std::string> calcules;
     do {
         system("cls");
-        std::cout << "MENU : \n[1] : Trame Al\202atoire\n[2] : Trame exemple concret\n[3] : Travailler sur une trame specifique\n[4] : Tutoriel\n";
+        std::cout << "\t\t\033[31;100mMENU\033[0m \n\n[1] : Trame Al\202atoire\n[2] : Trame exemple concret\n[3] : Travailler sur une trame specifique\n[4] : Tutoriel\n";
         std::cin >> choose;
         system("cls");
         if (choose == 1 || choose == 2) {
@@ -214,6 +213,7 @@ int main() {
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                std::cout << "coucou";
             }
             else {
                 std::vector<uint8_t> frame;
