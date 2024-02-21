@@ -70,6 +70,39 @@ std::vector<unsigned char> generateRandomFrame(size_t length) {
     return randomFrame;
 }
 
+void afficherTrameEchappee(std::vector<uint8_t>& escapedFrame) {
+
+    std::stringstream ss;
+    for (uint8_t byte : escapedFrame) {
+        ss << std::hex << static_cast<int>(byte);
+        ss << "  ";
+    }
+    std::string trameEchappee = ss.str();
+    std::cout << "\033[90m" << "Trame Echappee     : " << "\033[0m" << trameEchappee
+        << "\033[90m" << std::endl << "Caractere echappee : " << "\033[0m";
+    for (size_t i = 0; i < trameEchappee.size(); ++i) {
+        if (i + 1 < trameEchappee.size() && trameEchappee[i] == '7' && trameEchappee[i + 1] == 'd') {
+            std::cout << "\033[31m";
+            std::cout << trameEchappee.substr(i, 6);
+            std::cout << "\033[0m";
+            i += 5;
+        }
+        else {
+            std::cout << trameEchappee[i];
+        }
+    }
+}
+
+void afficherCalcules(std::vector<std::string> analyseDeLaTrame, std::vector<std::string> calcules) {
+    std::cout << std::endl << std::endl
+        << std::endl << std::endl << "\033[30;100mCalcules effectuer sur la trame :\033[0m" << std::endl;
+
+    for (size_t i = 0; i < analyseDeLaTrame.size(); i++) {
+        std::cout << analyseDeLaTrame.at(i);
+        std::cout << calcules.at(i);
+    }
+}
+
 int main() {
     int choose = 0;
     bool aleatoire = false; // Choissisez ici si vous souhaitez travailler sur une trame genere aleatoirement ou sur une trame exemple qui certifie des exemples claire
@@ -89,13 +122,15 @@ int main() {
                 aleatoire = true;
                 std::cout << "Choisissez la taille de la trame (25 par defaut)";
                 std::cin >> frameLength;
+                system("cls");
             }
             else if (choose == 2) {
                 aleatoire = false;
+                system("cls");
+                explication();
             }
-            system("cls");
-            std::cout << "\033[31m" << "\033[100m" << "\t\t\t\t\t\t TRAME XBee ECHAPPEE " << "\033[0m" << std::endl;
             frameAleatoire = generateRandomFrame(frameLength);
+            std::cout << "\033[31m" << "\033[100m" << "\t\t\t\t\t\t TRAME XBee ECHAPPEE " << "\033[0m" << std::endl << std::endl;
             std::cout << "\033[90m" << "Trame d'origine    : " << "\033[0m";
             if (aleatoire) {
                 for (uint8_t byte : frameAleatoire) {
@@ -110,33 +145,11 @@ int main() {
                 escapedFrame = escapeFrame(frameDefini, analyseDeLaTrame, calcules);
             }
 
-            std::stringstream ss;
-            for (uint8_t byte : escapedFrame) {
-                ss << std::hex << static_cast<int>(byte);
-                ss << "  ";
-            }
-            std::string trameEchappee = ss.str();
-            std::cout << "\033[90m" << "Trame Echappee     : " << "\033[0m" << trameEchappee
-                << "\033[90m" << std::endl << "Caractere echappee : " << "\033[0m";
-            for (size_t i = 0; i < trameEchappee.size(); ++i) {
-                if (i + 1 < trameEchappee.size() && trameEchappee[i] == '7' && trameEchappee[i + 1] == 'd') {
-                    std::cout << "\033[31m";
-                    std::cout << trameEchappee.substr(i, 6);
-                    std::cout << "\033[0m";
-                    i += 5;
-                }
-                else {
-                    std::cout << trameEchappee[i];
-                }
-            }
+            afficherTrameEchappee(escapedFrame);
+            afficherCalcules(analyseDeLaTrame, calcules);
 
-            std::cout << std::endl << std::endl
-                << std::endl << std::endl << "\033[30;100mCalcules effectuer sur la trame :\033[0m" << std::endl;
-
-            for (size_t i = 0; i < analyseDeLaTrame.size(); i++) {
-                std::cout << analyseDeLaTrame.at(i);
-                std::cout << calcules.at(i);
-            }
+            analyseDeLaTrame.clear();
+            calcules.clear();
 
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -159,10 +172,12 @@ int main() {
                 std::cout << "Entrez les octets de donnees (en hexadecimal) Exemple commencez avec 7d : ";
                 std::cout << std::endl;
                 bool fisrtTime = true;
+                std::vector<std::string> DataStok;
                 for (size_t i = 0; i < dataSize; ++i) {
                     if (!fisrtTime) std::cout << "\nbyte[" << i - 1 << "] : ";
                     fisrtTime = false;
                     std::getline(std::cin, bufferS);
+                    DataStok.push_back(bufferS);
                     char* endPtr;
                     errno = 0;
                     unsigned long value = std::strtoul(bufferS.c_str(), &endPtr, 16);
@@ -173,9 +188,25 @@ int main() {
                     buffer = static_cast<uint8_t>(value);
                     donne += buffer;
                 }
-                frame.insert(frame.begin(), { 0x7E, 0x00, static_cast<uint8_t>(dataSize) });
+                frame.insert(frame.begin(), { 0x7E, 0x00, static_cast<uint8_t>(dataSize - 1) });
                 uint8_t checksum = calculateChecksum(frame, donne);
-                std::cout << "Checksum calcule : 0x" << std::hex << static_cast<int>(checksum) << std::endl;
+                for (uint8_t byte : frame) {
+                    std::cout << "0x" << std::hex << static_cast<int>(byte) << " ";
+                }
+
+                for (size_t i = 0; i < DataStok.size() - 1; i++)
+                {
+                    std::cout << "0x" << DataStok.at(i + 1) << " ";
+
+                }std::cout << std::endl;
+                std::cout << "Cheksum = \033[33m0xFF\033[0m - [( \033[31m";
+   
+                for (size_t i = 0; i < DataStok.size() - 1; i++)
+                {
+                    std::cout << "0x" << DataStok.at(i + 1) << " ";
+
+                }
+                std::cout << "\033[0m)] % 256 = \033[36m0x" << std::hex << static_cast<int>(checksum) << " \033[30m" << std::endl;
 
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -184,20 +215,20 @@ int main() {
             else {
                 std::vector<uint8_t> frame;
 
-                // Demander à l'utilisateur la taille des données
+                // Demander a l'utilisateur la taille des donnees
                 size_t dataSize;
-                std::cout << "Entrez la taille des données : ";
+                std::cout << "Entrez la taille des donnees : ";
                 std::cin >> dataSize;
                 system("cls");
-                // Demander à l'utilisateur d'entrer les octets de données
-                std::cout << "Entrez les octets de données (en hexadécimal) : ";
+                // Demander a l'utilisateur d'entrer les octets de donnees
+                std::cout << "Entrez les octets de donnees (en hexadecimal) : ";
                 for (size_t i = 0; i < dataSize; ++i) {
                     uint16_t dataByte;
                     std::cin >> std::hex >> dataByte;
                     frame.push_back(static_cast<uint8_t>(dataByte));
                 }
 
-                // Ajouter le délimiteur de début et les octets de longueur à la trame
+                // Ajouter le delimiteur de debut et les octets de longueur a la trame
                 frame.insert(frame.begin(), { 0x7E, 0x00, static_cast<uint8_t>(dataSize) });
                 system("cls");
                 // Afficher la trame
@@ -209,33 +240,12 @@ int main() {
                 std::cout << std::endl;
                 escapedFrame = escapeFrame(frame, analyseDeLaTrame, calcules);
 
-                std::stringstream ss;
-                for (uint8_t byte : escapedFrame) {
-                    ss << std::hex << static_cast<int>(byte);
-                    ss << "  ";
-                }
-                std::string trameEchappee = ss.str();
-                std::cout << "\033[90m" << "Trame Echappee     : " << "\033[0m" << trameEchappee
-                    << "\033[90m" << std::endl << "Caractere echappee : " << "\033[0m";
-                for (size_t i = 0; i < trameEchappee.size(); ++i) {
-                    if (i + 1 < trameEchappee.size() && trameEchappee[i] == '7' && trameEchappee[i + 1] == 'd') {
-                        std::cout << "\033[31m";
-                        std::cout << trameEchappee.substr(i, 6);
-                        std::cout << "\033[0m";
-                        i += 5;
-                    }
-                    else {
-                        std::cout << trameEchappee[i];
-                    }
-                }
+                afficherTrameEchappee(escapedFrame);
+                afficherCalcules(analyseDeLaTrame, calcules);
 
-                std::cout << std::endl << std::endl
-                    << std::endl << std::endl << "\033[30;100mCalcules effectuer sur la trame :\033[0m" << std::endl;
+                analyseDeLaTrame.clear();
+                calcules.clear();
 
-                for (size_t i = 0; i < analyseDeLaTrame.size(); i++) {
-                    std::cout << analyseDeLaTrame.at(i);
-                    std::cout << calcules.at(i);
-                }
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -256,7 +266,7 @@ void explication() {
 
     std::cout << "\033[31m" << "\033[100m" << "\t\t\t\t\t\t ANALYSE DE TRAME XBee " << "\033[0m" << std::endl;
 
-    std::cout << "\033[30;100mRappel :\033[0m" << std::endl << "Les caractere suivant serons echappe : \033[32m(0x7E, 0x7D, 0x11, 0x13)\033[0m." << std::endl << std::endl;
+    std::cout << "\033[30;100mRappel :\033[0m" << std::endl << "Les caracteres suivant serons echappe : \033[32m(0x7E, 0x7D, 0x11, 0x13)\033[0m." << std::endl << std::endl;
     std::cout << "\033[30;100mAttention :\033[0m " << std::endl << "Le caractere\033[33m (0x7E)\033[0m fait partie des caracteres a echapper, toutefois," << std::endl << "il represente aussi le caractere de \033[31mSTART\033[0m, alors il ne doit etre" 
         << std::endl << "echappe que s'il ne represente pas le start dans la trame." << std::endl << std::endl;
 
@@ -268,9 +278,7 @@ void explication() {
     std::cout << "\t^  0010 0000    \033[33m(0x20)\033[0m" << std::endl;
     std::cout << "\t------------------------" << std::endl;
     std::cout << "\t   0011 0001    \033[35m(0x31)\033[0m" << std::endl << std::endl;
-    std::cout << "Et donc \033[32m(0x11)\033[0m se transformera en 0x7D \033[35m0x31\033[0m" << std::endl << std::endl << std::endl;
-
-    std::cout << "\033[31m" << "\033[100m" << "\t\t\t\t\t\t TRAVAIL SUR LA TRAME " << "\033[0m" << std::endl;
+    std::cout << "Et donc \033[32m(0x11)\033[0m se transformera en 0x7D \033[35m0x31\033[0m" << std::endl << std::endl;
 
 }
 
@@ -291,11 +299,11 @@ void tuto() {
     std::cout << "\t   0011 0001    \033[35m(0x31)\033[0m" << std::endl << std::endl;
     std::cout << "Et donc \033[32m(0x11)\033[0m se transformera en 0x7D \033[35m0x31\033[0m" << std::endl << std::endl << std::endl;
 
-    std::cout << "\033[31m" << "\033[100m" << "\t\t\t\t\t\t TRAME " << "\033[0m" << std::endl;
+    std::cout << "\t\t\t\t\t\t    \033[31;100m TRAME " << "\033[0m" << std::endl;
+    std::cout  << std::endl;
 
-
-    std::cout << "| Start Delimiter | Frame Length (MSB) | Frame Length (LSB) | Frame Type | Frame Data | Frame Checksum |" << std::endl;
-    std::cout << "|      0x7E       |       MSB          |       LSB          |     ...    |    ...     |      ...       |" << std::endl;
+    std::cout << "\t| Start Delimiter | Frame Length (MSB) | Frame Length (LSB) | Frame Type | Frame Data | Frame Checksum |" << std::endl;
+    std::cout << "\t|      0x7E       |       MSB          |       LSB          |     ...    |    ...     |      ...       |" << std::endl;
 
     std::cout << std::endl << std::endl;
     std::cout << "\033[31m" << "\033[100m" << "\t\t\t\t CALCULER ET VERIFIER LE CHECKSUM " << "\033[0m" << std::endl << std::endl;
@@ -303,16 +311,36 @@ void tuto() {
     std::cout << "\033[30;100mPour calculer le checksum d'une trame XBee :\033[0m" << std::endl;
     std::cout << "1. Additionnez tous les octets du paquet, sauf le delimiteur de debut 0x7E et la longueur (les deuxieme et troisieme octets)." << std::endl << std::endl;
     std::cout << "2. Conservez uniquement les 8 bits les plus faibles du resultat." << std::endl << std::endl;
-    std::cout << "3. Soustrayez cette quantite de 0xFF." << std::endl << std::endl;
+    std::cout << "3. Soustrayez cette quantite de \033[33m0xFF\033[0m." << std::endl << std::endl;
     std::cout << "Pour verifier le checksum d'une trame XBee :" << std::endl << std::endl;
     std::cout << "1. Additionnez tous les octets, y compris le checksum; n'incluez pas le delimiteur et la longueur." << std::endl << std::endl;
-    std::cout << "2. Si le checksum est correct, les deux derniers chiffres tout a droite de la somme sont egaux a 0xFF." << std::endl << std::endl;
-    std::cout << "\t\t\t\tCheksum = 0xFF - [ (Somme des data) % 256]" << std::endl << std::endl;
+    std::cout << "2. Si le checksum est correct, les deux derniers chiffres tout a droite de la somme sont egaux a \033[33m0xFF\033[0m." << std::endl << std::endl;
+    std::cout << "\t\t\t\tCheksum = \033[33m0xFF\033[0m - [ (\033[31mSomme des data\033[0m) % \033[33m256\033[0m]" << std::endl << std::endl;
+    std::cout << "\033[30;100mExemple : \033[0m" << std::endl << std::endl;
+    std::cout << "Admettons que nous ayons la trame suivante : " << std::endl << std::endl;
+    std::cout << "\t\033[90m_______________________________________________________________________________________________________" << std::endl;
+    std::cout << "\t| Start Delimiter | Frame Length (MSB) | Frame Length (LSB) |        Frame Data       | Frame Checksum |" << std::endl;
+    std::cout << "\t--------------------------------------------------------------------------------------------------------" << std::endl;
+    std::cout << "\t|      0x7E       |       0x00          |       0x03        |    \033[31m 0x7d  0xfa  x011\033[90m    |        ?       |" << std::endl;
+    std::cout << "\t--------------------------------------------------------------------------------------------------------\033[0m" << std::endl;
+    std::cout << std::endl << std::endl;
+    std::cout << "\t\t\t    Cheksum = \033[33m0xFF\033[0m - [ (\033[31m 0x7d + 0xfa + x011\033[90m) % \033[33m256\033[0m] = \033[36m0x77\033[0m" << std::endl << std::endl;
+    std::cout << "\t\t\t    \033[90mAddition des valeurs a l'interieur des parentheses :\033[0m" << std::endl << std::endl;
+    std::cout << "\t\t\t    \033[31m(0x7d + 0xfa + 0x11) = (125 + 250 + 17)\033[0m = 392" << std::endl << std::endl;
+    std::cout << "\t\t\t    \033[90mCalcul du reste de la division par \033[0m256 : 392 % 256 = 136\033[0m" << std::endl << std::endl;
+    std::cout << "\t\t\t    \033[90mSoustraction du reste obtenu de \033[33m0xFF\033[0m : 0xff - 136 = 255 - 136 = 119\033[0m" << std::endl << std::endl;
+    std::cout << "\t\t\t    \033[90mDonc, le resultat de l'expression \033[33m0xFF\033[0m - [ (\033[31m 0x7d + 0xfa + x011\033[90m) % \033[33m256\033[0m] est \033[36m119\033[0m" << std::endl << std::endl;
+    std::cout << "\t\t\t    \033[90mSoit \033[0m119 = 0x77\033[0m donc :" << std::endl << std::endl;
+    std::cout << "\t\t\t    Cheksum = \033[33m0xFF\033[0m - [ (\033[31m 0x7d + 0xfa + x011 \033[90m) % \033[33m256\033[0m] = \033[36m0x77\033[0m" << std::endl << std::endl;
 
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
+
+
+
+
 
 
 
